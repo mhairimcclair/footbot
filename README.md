@@ -1,6 +1,6 @@
 # WC2026 Footbot
 
-**GitHub:** https://github.com/mhairimcclair/footbot
+**GitHub:** https://github.com/Skyscanner/footbot
 
 A Slack bot for World Cup 2026 (11 Jun – 19 Jul 2026). Posts live goal alerts, red cards, and line-ups to a Slack channel, and responds to slash commands for fixtures, standings, and more.
 

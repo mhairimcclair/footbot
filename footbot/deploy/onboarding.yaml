@@ -22,7 +22,7 @@ spec:
       enabled: false
   gitOps:
     enabled: true
-    sourceRepository: https://github.com/mhairimcclair/footbot
+    sourceRepository: https://github.com/Skyscanner/footbot
   maxReplicasPerCell: 1                # one replica is enough — bot uses Socket Mode
   resourcesPerPod:
     requests:
