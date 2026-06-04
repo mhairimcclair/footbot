@@ -1,0 +1,76 @@
+# Slingshot GitOps deployment — PRODUCTION
+# Points at the real company Slack channel.
+# Only deploy this once sandbox is verified and you have company Slack approval.
+#
+# Prerequisites:
+#   1. cells-onboarding PR merged (deploy/onboarding.yaml)
+#   2. Docker image pushed to the Skyscanner registry:
+#        docker build -t <REGISTRY>/<YOUR-AWS-PROJECT>/footbot:<TAG> .
+#        docker push <REGISTRY>/<YOUR-AWS-PROJECT>/footbot:<TAG>
+#   3. Production secrets stored in CredStash:
+#        credstash -r eu-west-1 -t <YOUR-AWS-PROJECT> put footbot-prod.slack-bot-token  "xoxb-..."
+#        credstash -r eu-west-1 -t <YOUR-AWS-PROJECT> put footbot-prod.slack-app-token  "xapp-..."
+#        credstash -r eu-west-1 -t <YOUR-AWS-PROJECT> put footbot-prod.football-data-token "..."
+#   4. IAM role with CredStash read permissions (ask #engineering-support)
+---
+version: '1'
+serviceName: footbot-prod
+componentName: footbot-prod
+serviceType: gitops-cells
+
+accounts:
+  - name: cells-1
+
+cells:
+  - cells-1-eu-west-1a-1
+
+regions:
+  - eu-west-1
+
+charts:
+  - name: cells-service-deployment
+    version: LATEST
+
+values:
+  cells-service-deployment:
+    deployment:
+      replicaCount: 1
+
+      image:
+        repository: <REGISTRY>/<YOUR-AWS-PROJECT>/footbot
+        tag: latest                                          # pin to a specific SHA/semver for prod
+
+      env:
+        - name: SLACK_CHANNEL
+          value: "<YOUR-PROD-SLACK-CHANNEL-ID>"             # replace with the real company channel
+
+        - name: FOOTBALL_DATA_TIER
+          value: "free"                                      # change to "paid" if you upgrade
+        - name: MATCHDAY_SUMMARY_HOUR
+          value: "5"
+        - name: MATCHDAY_SUMMARY_MINUTE
+          value: "0"
+
+      secrets:
+        - envVar: SLACK_BOT_TOKEN
+          credstashKey: footbot-prod.slack-bot-token
+        - envVar: SLACK_APP_TOKEN
+          credstashKey: footbot-prod.slack-app-token
+        - envVar: FOOTBALL_DATA_TOKEN
+          credstashKey: footbot-prod.football-data-token
+
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 100m
+          memory: 256Mi
+
+      livenessProbe:
+        enabled: false
+      readinessProbe:
+        enabled: false
+
+    service:
+      enabled: false

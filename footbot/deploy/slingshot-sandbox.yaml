@@ -1,19 +1,16 @@
-# Slingshot GitOps deployment for footbot (Cells/Kubernetes).
+# Slingshot GitOps deployment — SANDBOX
+# Points at the sandbox Slack channel for testing before going live.
 #
-# Prerequisites before deploying:
+# Prerequisites:
 #   1. cells-onboarding PR merged (deploy/onboarding.yaml)
 #   2. Docker image pushed to the Skyscanner registry:
 #        docker build -t <REGISTRY>/<YOUR-AWS-PROJECT>/footbot:<TAG> .
 #        docker push <REGISTRY>/<YOUR-AWS-PROJECT>/footbot:<TAG>
-#   3. Secrets stored in CredStash under your project:
-#        credstash -r eu-west-1 -t <YOUR-AWS-PROJECT> put footbot.slack-bot-token  "xoxb-..."
-#        credstash -r eu-west-1 -t <YOUR-AWS-PROJECT> put footbot.slack-app-token  "xapp-..."
-#        credstash -r eu-west-1 -t <YOUR-AWS-PROJECT> put footbot.football-data-token "..."
-#   4. IAM role footbot-cells-1-eu-west-1 created with CredStash read permissions
-#      (ask #engineering-support / Platform team to create this if you don't have access)
-#
-# To deploy: trigger a Slingshot pipeline run pointing at this file, or push to
-# the GitOps branch configured in your Slingshot setup.
+#   3. Sandbox secrets stored in CredStash:
+#        credstash -r eu-west-1 -t <YOUR-AWS-PROJECT> put footbot-sandbox.slack-bot-token  "xoxb-..."
+#        credstash -r eu-west-1 -t <YOUR-AWS-PROJECT> put footbot-sandbox.slack-app-token  "xapp-..."
+#        credstash -r eu-west-1 -t <YOUR-AWS-PROJECT> put footbot-sandbox.football-data-token "..."
+#   4. IAM role with CredStash read permissions (ask #engineering-support)
 ---
 version: '1'
 serviceName: footbot
@@ -44,7 +41,7 @@ values:
 
       env:
         - name: SLACK_CHANNEL
-          value: "<YOUR-SLACK-CHANNEL-ID>"                  # e.g. C01234ABCDE
+          value: "C0B67RJ7U48"                  # Sandbox Slack channel
 
         # Optional overrides — defaults come from config.py
         - name: FOOTBALL_DATA_TIER
@@ -58,11 +55,11 @@ values:
       # Key names must match what you stored in CredStash above.
       secrets:
         - envVar: SLACK_BOT_TOKEN
-          credstashKey: footbot.slack-bot-token
+          credstashKey: footbot-sandbox.slack-bot-token
         - envVar: SLACK_APP_TOKEN
-          credstashKey: footbot.slack-app-token
+          credstashKey: footbot-sandbox.slack-app-token
         - envVar: FOOTBALL_DATA_TOKEN
-          credstashKey: footbot.football-data-token
+          credstashKey: footbot-sandbox.football-data-token
 
       resources:
         requests:
