@@ -45,7 +45,7 @@ values:
 
         # Optional overrides — defaults come from config.py
         - name: FOOTBALL_DATA_TIER
-          value: "free"                                      # or "paid" if you upgrade
+          value: "paid"                                      # or "free" if you downgrade
         - name: MATCHDAY_SUMMARY_HOUR
           value: "5"
         - name: MATCHDAY_SUMMARY_MINUTE

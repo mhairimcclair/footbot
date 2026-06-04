@@ -42,10 +42,10 @@ values:
 
       env:
         - name: SLACK_CHANNEL
-          value: "<YOUR-PROD-SLACK-CHANNEL-ID>"             # replace with the real company channel
+          value: "C0B827VHLJF"
 
         - name: FOOTBALL_DATA_TIER
-          value: "free"                                      # change to "paid" if you upgrade
+          value: "paid"                                      # change to "free" if you downgrade
         - name: MATCHDAY_SUMMARY_HOUR
           value: "5"
         - name: MATCHDAY_SUMMARY_MINUTE
