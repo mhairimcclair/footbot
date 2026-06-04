@@ -1,0 +1,38 @@
+# This file goes in the cells-onboarding repo at:
+#   config/<YOUR-AWS-PROJECT>/footbot.yaml
+#
+# Steps:
+#   1. Checkout https://github.com/Skyscanner/cells-onboarding
+#   2. Create config/<YOUR-AWS-PROJECT>/footbot.yaml with this content
+#   3. Raise a PR and tag @kubernetes-gf in #engineering-support to merge
+#
+# Note: footbot uses Slack Socket Mode — no inbound HTTP traffic — so
+# http is disabled. It only needs outbound internet egress to:
+#   - hooks.slack.com (Socket Mode WebSocket)
+#   - api.football-data.org (match data API)
+---
+apiVersion: onboarding.skyscanner.io/v1beta1
+kind: Microservice
+metadata:
+  name: footbot
+spec:
+  project: <YOUR-AWS-PROJECT>          # replace with your AWS project name
+  protocols:
+    http:
+      enabled: false
+  gitOps:
+    enabled: true
+    sourceRepository: https://github.com/Skyscanner/<YOUR-REPO>  # replace with your GHE repo
+  maxReplicasPerCell: 1                # one replica is enough — bot uses Socket Mode
+  resourcesPerPod:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+  iamRole: "arn:aws:iam::{{ .AccountID }}:role/footbot-.*"
+  placement:
+    - account: cells-1
+      cells:
+        - cells-1-eu-west-1a-1         # single EU-West cell is fine for an internal bot

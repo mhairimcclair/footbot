@@ -1,0 +1,83 @@
+# Slingshot GitOps deployment for footbot (Cells/Kubernetes).
+#
+# Prerequisites before deploying:
+#   1. cells-onboarding PR merged (deploy/onboarding.yaml)
+#   2. Docker image pushed to the Skyscanner registry:
+#        docker build -t <REGISTRY>/<YOUR-AWS-PROJECT>/footbot:<TAG> .
+#        docker push <REGISTRY>/<YOUR-AWS-PROJECT>/footbot:<TAG>
+#   3. Secrets stored in CredStash under your project:
+#        credstash -r eu-west-1 -t <YOUR-AWS-PROJECT> put footbot.slack-bot-token  "xoxb-..."
+#        credstash -r eu-west-1 -t <YOUR-AWS-PROJECT> put footbot.slack-app-token  "xapp-..."
+#        credstash -r eu-west-1 -t <YOUR-AWS-PROJECT> put footbot.football-data-token "..."
+#   4. IAM role footbot-cells-1-eu-west-1 created with CredStash read permissions
+#      (ask #engineering-support / Platform team to create this if you don't have access)
+#
+# To deploy: trigger a Slingshot pipeline run pointing at this file, or push to
+# the GitOps branch configured in your Slingshot setup.
+---
+version: '1'
+serviceName: footbot
+componentName: footbot
+serviceType: gitops-cells
+
+accounts:
+  - name: cells-1
+
+cells:
+  - cells-1-eu-west-1a-1
+
+regions:
+  - eu-west-1
+
+charts:
+  - name: cells-service-deployment
+    version: LATEST                    # pin to a specific version once you've confirmed it works
+
+values:
+  cells-service-deployment:
+    deployment:
+      replicaCount: 1
+
+      image:
+        repository: <REGISTRY>/<YOUR-AWS-PROJECT>/footbot   # replace with your image path
+        tag: latest                                          # or a pinned SHA/semver tag
+
+      env:
+        - name: SLACK_CHANNEL
+          value: "<YOUR-SLACK-CHANNEL-ID>"                  # e.g. C01234ABCDE
+
+        # Optional overrides — defaults come from config.py
+        - name: FOOTBALL_DATA_TIER
+          value: "free"                                      # or "paid" if you upgrade
+        - name: MATCHDAY_SUMMARY_HOUR
+          value: "5"
+        - name: MATCHDAY_SUMMARY_MINUTE
+          value: "0"
+
+      # Secrets injected from CredStash at pod startup via mshell-secrets sidecar.
+      # Key names must match what you stored in CredStash above.
+      secrets:
+        - envVar: SLACK_BOT_TOKEN
+          credstashKey: footbot.slack-bot-token
+        - envVar: SLACK_APP_TOKEN
+          credstashKey: footbot.slack-app-token
+        - envVar: FOOTBALL_DATA_TOKEN
+          credstashKey: footbot.football-data-token
+
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 100m
+          memory: 256Mi
+
+      # Footbot doesn't expose HTTP — disable the default liveness/readiness probes.
+      livenessProbe:
+        enabled: false
+      readinessProbe:
+        enabled: false
+
+    # No ingress needed — Socket Mode is outbound-only.
+    service:
+      enabled: false
