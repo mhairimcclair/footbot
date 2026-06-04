@@ -22,7 +22,7 @@ spec:
       enabled: false
   gitOps:
     enabled: true
-    sourceRepository: https://github.com/Skyscanner/<YOUR-REPO>  # replace with your GHE repo
+    sourceRepository: https://github.com/mhairimcclair/footbot
   maxReplicasPerCell: 1                # one replica is enough — bot uses Socket Mode
   resourcesPerPod:
     requests:
